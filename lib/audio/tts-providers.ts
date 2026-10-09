@@ -95,6 +95,7 @@
 
 import type { TTSModelConfig } from './types';
 import { isCustomTTSProvider } from './types';
+import { openAITTSResponseFormat } from './configured-tts-voices';
 import {
   isQwenCloneVoice,
   resolveTTSModelForVoice,
@@ -363,6 +364,7 @@ async function generateOpenAITTS(
   signal: AbortSignal,
 ): Promise<TTSGenerationResult> {
   const baseUrl = config.baseUrl || TTS_PROVIDERS['openai-tts'].defaultBaseUrl;
+  const responseFormat = openAITTSResponseFormat(config.providerOptions);
 
   // Use gpt-4o-mini-tts for best quality and intelligent realtime applications
   const response = await ttsFetch(config, `${baseUrl}/audio/speech`, {
@@ -381,8 +383,9 @@ async function generateOpenAITTS(
       // their defaults differ — OpenRouter's /audio/speech defaults to raw
       // `pcm`, which arrives headerless, gets labelled mp3 below, and fails in
       // the client with "no supported source was found". Naming the format
-      // removes the guess. Providers that ignore the field are unaffected.
-      response_format: 'mp3',
+      // removes the guess. Providers that ignore the field are unaffected;
+      // a server that serves no mp3 names its format in options.format.
+      response_format: responseFormat,
     }),
     signal,
   });
@@ -393,7 +396,7 @@ async function generateOpenAITTS(
     throw new Error(`OpenAI TTS API error: ${error.error?.message || response.statusText}`);
   }
 
-  return await validateTTSAudioResponse(response, 'OpenAI');
+  return await validateTTSAudioResponse(response, 'OpenAI', responseFormat);
 }
 
 /**

@@ -13,6 +13,7 @@ import {
   voiceServesModel,
 } from '@/lib/audio/constants';
 import type { BuiltInTTSProviderId, TTSProviderId } from '@/lib/audio/types';
+import { configuredTTSVoices, providerOffersVoice } from '@/lib/audio/configured-tts-voices';
 import { isTTSProviderEnabled } from '@/lib/audio/provider-enablement';
 import { voiceBindingKey } from '@/lib/audio/unavailable-voice-bindings';
 import {
@@ -61,8 +62,17 @@ function providersConfig(target: RunNarrationTarget): Record<
   };
 }
 
-/** A provider's default voice, or the first catalogue voice its model can speak. */
-function defaultVoiceFor(providerId: string, modelId?: string): string {
+/**
+ * A provider's default voice, or the first catalogue voice its model can
+ * speak; the first declared voice for a server with its own (options.voices).
+ */
+function defaultVoiceFor(
+  providerId: string,
+  modelId?: string,
+  options?: Record<string, unknown>,
+): string {
+  const declared = configuredTTSVoices(options);
+  if (declared) return declared[0].id;
   const preferred = DEFAULT_TTS_VOICES[providerId as BuiltInTTSProviderId] || 'default';
   if (voiceServesModel(providerId, preferred, modelId)) return preferred;
   const voices = TTS_PROVIDERS[providerId as BuiltInTTSProviderId]?.voices ?? [];
@@ -77,9 +87,12 @@ export function slotVoice(
   const usable =
     preference?.providerId === target.providerId &&
     !!preference.voiceId &&
-    voiceServesModel(target.providerId, preference.voiceId, target.modelId);
+    voiceServesModel(target.providerId, preference.voiceId, target.modelId) &&
+    providerOffersVoice(target.connection.options, preference.voiceId);
   return {
-    voice: usable ? preference!.voiceId : defaultVoiceFor(target.providerId, target.modelId),
+    voice: usable
+      ? preference!.voiceId
+      : defaultVoiceFor(target.providerId, target.modelId, target.connection.options),
     speed: preference?.speed ?? 1,
   };
 }

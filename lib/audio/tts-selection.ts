@@ -8,6 +8,7 @@
  */
 import { DEFAULT_TTS_VOICES, TTS_PROVIDERS, voiceServesModel } from '@/lib/audio/constants';
 import { normalizeVoxCPMBackend } from '@/lib/audio/voxcpm';
+import { configuredTTSVoices, providerOffersVoice } from '@/lib/audio/configured-tts-voices';
 import type { BuiltInTTSProviderId, TTSProviderId } from '@/lib/audio/types';
 import {
   currentModelCapabilities,
@@ -65,9 +66,16 @@ export function slotTTSProvidersConfig(target: EffectiveTarget | null): SlotTTSP
 
 /**
  * A provider's own default voice, or, when its model cannot speak that one,
- * the first catalogue voice it can.
+ * the first catalogue voice it can. A server that declares its own voices
+ * (options.voices) defaults to the first of them.
  */
-export function defaultVoiceFor(providerId: string, modelId?: string): string {
+export function defaultVoiceFor(
+  providerId: string,
+  modelId?: string,
+  options?: Record<string, unknown>,
+): string {
+  const declared = configuredTTSVoices(options);
+  if (declared) return declared[0].id;
   const preferred = DEFAULT_TTS_VOICES[providerId as BuiltInTTSProviderId] || 'default';
   if (voiceServesModel(providerId, preferred, modelId)) return preferred;
   const voices = TTS_PROVIDERS[providerId as BuiltInTTSProviderId]?.voices ?? [];
@@ -104,11 +112,12 @@ export function ttsSelection(
   const usable =
     preference.providerId === providerId &&
     !!preference.voice &&
-    voiceServesModel(providerId, preference.voice, model);
+    voiceServesModel(providerId, preference.voice, model) &&
+    providerOffersVoice(target.options, preference.voice);
   return {
     providerId,
     ...(target.modelId ? { modelId: target.modelId } : {}),
-    voice: usable ? preference.voice : defaultVoiceFor(providerId, model),
+    voice: usable ? preference.voice : defaultVoiceFor(providerId, model, target.options),
     speed: preference.speed,
     providersConfig: slotTTSProvidersConfig(target),
   };

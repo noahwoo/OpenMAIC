@@ -1,6 +1,7 @@
-import { DEFAULT_TTS_MODELS, DEFAULT_TTS_VOICES, TTS_PROVIDERS } from '@/lib/audio/constants';
+import { DEFAULT_TTS_MODELS, TTS_PROVIDERS } from '@/lib/audio/constants';
 import { generateTTS, TTSRequestTimeoutError } from '@/lib/audio/tts-providers';
 import type { TTSProviderId } from '@/lib/audio/types';
+import { providerDefaultVoice, providerOffersVoice } from '@/lib/audio/configured-tts-voices';
 import { BROWSER_NATIVE_TTS_PROVIDER_ID } from '@/lib/audio/provider-enablement';
 import type { LegacySpeechAction, SpeechAction } from '@/lib/types/action';
 import type { GeneratedAgentConfig, Scene } from '@/lib/types/stage';
@@ -54,9 +55,11 @@ export async function synthesizeSceneNarration(input: SceneTtsInput): Promise<Sc
     return { available: false, changed: false, generated: 0, skipped: 0, failed: [] };
   }
   const voice =
-    bound?.providerId === providerId && bound.voiceId
+    bound?.providerId === providerId &&
+    bound.voiceId &&
+    providerOffersVoice(connection.options, bound.voiceId)
       ? bound.voiceId
-      : DEFAULT_TTS_VOICES[providerId as keyof typeof DEFAULT_TTS_VOICES] || '';
+      : providerDefaultVoice(providerId, connection.options);
   const model =
     connection.modelId ?? (DEFAULT_TTS_MODELS[providerId as keyof typeof DEFAULT_TTS_MODELS] || '');
   // A configured slot's own model; the legacy server pins apply only to a default.

@@ -33,6 +33,7 @@ import type { GeneratedAgentConfig, Stage } from '@openmaic/dsl';
 import type { Scene } from '@/lib/types/stage';
 import { normalizeVoiceDesign } from '@/lib/audio/voice-design';
 import { TTS_PROVIDERS } from '@/lib/audio/constants';
+import { providerTTSVoices } from '@/lib/audio/configured-tts-voices';
 import {
   buildVoiceCatalog,
   type CatalogVoice,
@@ -117,7 +118,8 @@ export function agentVoiceCatalog(
       continue;
     }
     if (config.requiresApiKey && !hasKey()) continue;
-    providers.push(config);
+    // A server's own voices (options.voices) replace the registry's.
+    providers.push({ ...config, voices: providerTTSVoices(id, slot?.options) });
   }
   // A registration backend means clone-kind registered voices are
   // synthesizable and therefore bindable (the session loop is live).

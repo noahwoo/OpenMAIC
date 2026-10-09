@@ -5,8 +5,9 @@
  * responses.
  */
 import { generateTTS, type TTSGenerationResult } from '@/lib/audio/tts-providers';
-import { TTS_PROVIDERS, DEFAULT_TTS_VOICES, isQwenCloneVoice } from '@/lib/audio/constants';
+import { TTS_PROVIDERS, isQwenCloneVoice } from '@/lib/audio/constants';
 import type { TTSProviderId } from '@/lib/audio/types';
+import { providerDefaultVoice } from '@/lib/audio/configured-tts-voices';
 import { VOXCPM_AUTO_VOICE_ID, VOXCPM_TTS_PROVIDER_ID } from '@/lib/audio/voxcpm';
 import { recordGenerationUsage } from '@/lib/server/usage-storage';
 import { resolveTTSModel, slotTTSModel } from '@/lib/server/provider-config';
@@ -62,7 +63,7 @@ export async function synthesizeNarration(
   const ttsVoice =
     requestedVoice && (!requestedProviderId || requestedProviderId === ttsProviderId)
       ? requestedVoice
-      : DEFAULT_TTS_VOICES[ttsProviderId as keyof typeof DEFAULT_TTS_VOICES] || requestedVoice;
+      : providerDefaultVoice(ttsProviderId, connection.options) || requestedVoice;
   trace.voice = ttsVoice;
   if (!ttsVoice) {
     throw new StepRefusal<NarrationRefusal>('voice-missing', 'Missing required field: ttsVoice');

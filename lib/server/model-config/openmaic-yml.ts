@@ -23,6 +23,7 @@ import {
   type SlotId,
 } from '@/lib/config/model-slots';
 import { getProviderPreset } from '@/lib/config/provider-presets';
+import { isOpenAITTSFormat, OPENAI_TTS_FORMATS } from '@/lib/audio/configured-tts-voices';
 import { VALID_EFFORTS, VALID_LEVELS, VALID_MODES } from '@/lib/server/model-routes';
 
 export const DEFAULT_MODEL_CONFIG_FILE = 'openmaic.yml';
@@ -293,6 +294,16 @@ function crossCheck(
     }
     if (preset.requiresBaseUrl && !provider.baseUrl) {
       issues.push(`providers.${id}.baseUrl: preset "${preset.id}" needs a baseUrl`);
+    }
+    // The audio format an OpenAI-compatible speech server is asked for: a typo
+    // would otherwise fail every narration clip, not the boot.
+    const format = provider.options?.format;
+    if (preset.capabilities.tts?.registryId === 'openai-tts' && !isOpenAITTSFormat(format)) {
+      const formatAt = `providers.${id}.options.format`;
+      issues.push(
+        `${formatAt}: unsupported audio format ${shown(String(format), formatAt)} ` +
+          `(expected one of ${OPENAI_TTS_FORMATS.join(', ')})`,
+      );
     }
   }
 

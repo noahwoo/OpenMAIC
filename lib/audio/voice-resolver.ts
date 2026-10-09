@@ -14,6 +14,7 @@ import {
   isTTSProviderEnabled,
   type TTSEnablementConfig,
 } from '@/lib/audio/provider-enablement';
+import { providerOffersVoice, providerTTSVoices } from '@/lib/audio/configured-tts-voices';
 import {
   VOXCPM_TTS_PROVIDER_ID,
   getVoxCPMProfileVoiceId,
@@ -37,7 +38,12 @@ export interface AgentVoiceOverride {
 /** Persisted per-agent voice picks, keyed by agent id (settings store). */
 export type AgentVoiceOverrides = Record<string, AgentVoiceOverride>;
 
-type ProviderConfigMap = Record<string, (TTSEnablementConfig & { modelId?: string }) | undefined>;
+type ProviderVoiceConfig = TTSEnablementConfig & {
+  modelId?: string;
+  providerOptions?: Record<string, unknown>;
+};
+
+type ProviderConfigMap = Record<string, ProviderVoiceConfig | undefined>;
 
 /** Prefer a persisted narrator binding, retaining the global fallback when it is unusable. */
 export function resolveNarratorVoiceBinding(
@@ -54,7 +60,9 @@ export function resolveNarratorVoiceBinding(
       bound.providerId,
       bound.voiceId,
       providerConfigs[bound.providerId]?.modelId || bound.modelId,
-    )
+    ) &&
+    // Nor is one the server does not declare (options.voices).
+    providerOffersVoice(providerConfigs[bound.providerId]?.providerOptions, bound.voiceId)
   ) {
     // Qwen clone IDs are account-scoped but self-contained: local IndexedDB is
     // not an authority. Catalog voices remain validated against the catalog.
@@ -244,12 +252,13 @@ export function narratorVoiceAfterMissingClone(input: {
 export function resolveNarratorVoiceForGeneration(
   providerId: TTSProviderId,
   voiceId: string | undefined,
-  providerConfig: (TTSEnablementConfig & { modelId?: string }) | undefined,
+  providerConfig: ProviderVoiceConfig | undefined,
 ): ResolvedVoice | undefined {
   const trimmed = voiceId?.trim();
   if (!providerId || !trimmed) return undefined;
   if (!isTTSProviderEnabled(providerId, providerConfig)) return undefined;
   if (!voiceServesModel(providerId, trimmed, providerConfig?.modelId)) return undefined;
+  if (!providerOffersVoice(providerConfig?.providerOptions, trimmed)) return undefined;
   const modelId =
     providerId === 'qwen-tts' && isQwenCloneVoice(trimmed)
       ? resolveTTSModelForVoice(providerId, trimmed, providerConfig?.modelId)
@@ -326,9 +335,11 @@ export function getEnabledProvidersWithVoices(
   for (const [id, config] of Object.entries(TTS_PROVIDERS)) {
     const providerId = id as TTSProviderId;
     if (providerId === 'browser-native-tts') continue;
-    if (config.voices.length === 0) continue;
 
     const providerConfig = ttsProvidersConfig[providerId];
+    // A server's own voice list (options.voices) replaces the registry's.
+    const catalogue = providerTTSVoices(providerId, providerConfig?.providerOptions);
+    if (catalogue.length === 0) continue;
     if (!isTTSProviderEnabled(providerId, providerConfig)) continue;
 
     const providerProfiles = voiceProfiles.filter(
@@ -358,7 +369,7 @@ export function getEnabledProvidersWithVoices(
 
     {
       const allVoices = [
-        ...config.voices.map((v) => ({
+        ...catalogue.map((v) => ({
           id: v.id,
           name: v.name,
           language: v.language,
@@ -373,7 +384,7 @@ export function getEnabledProvidersWithVoices(
           const compatibleVoices =
             providerId === 'qwen-tts' && isQwenVoiceCloneModel(model.id)
               ? []
-              : config.voices
+              : catalogue
                   .filter((v) => !v.compatibleModels || v.compatibleModels.includes(model.id))
                   .map((v) => ({ id: v.id, name: v.name, language: v.language }));
           if (providerId === VOXCPM_TTS_PROVIDER_ID) {

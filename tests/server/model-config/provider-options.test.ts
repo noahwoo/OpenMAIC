@@ -219,3 +219,55 @@ describe('workspace providers', () => {
     expect(next.providers?.mm).toEqual({ preset: 'minimax-tts', apiKey: 'sk-workspace-key-123' });
   });
 });
+
+describe('an OpenAI-compatible speech server format', () => {
+  const speech = (format: string) =>
+    [
+      'providers:',
+      '  speech:',
+      '    preset: openai-tts',
+      '    apiKey: k',
+      '    baseUrl: https://tts.test/v1',
+      '    options:',
+      `      format: ${format}`,
+    ].join('\n');
+
+  it('accepts a format the adapter can request', () => {
+    expect(parseModelConfig(speech('wav'), { env: {} }).providers?.speech.options).toEqual({
+      format: 'wav',
+    });
+  });
+
+  it('refuses at startup a format the adapter cannot request', () => {
+    expect(() => parseModelConfig(speech('pcm'), { env: {} })).toThrow(
+      /providers\.speech\.options\.format: .*"pcm".*mp3, opus, aac, flac, wav/,
+    );
+  });
+
+  it('does not print a format that came from an environment variable', () => {
+    let message = '';
+    try {
+      parseModelConfig(speech('${TTS_FORMAT}'), { env: { TTS_FORMAT: 'pcm' } });
+    } catch (error) {
+      message = (error as Error).message;
+    }
+    expect(message).toMatch(/providers\.speech\.options\.format/);
+    expect(message).not.toContain('"pcm"');
+  });
+
+  it('leaves the options of other presets alone', () => {
+    expect(() =>
+      parseModelConfig(
+        [
+          'providers:',
+          '  vox:',
+          '    preset: voxcpm-tts',
+          '    baseUrl: https://voxcpm.test',
+          '    options:',
+          '      format: pcm',
+        ].join('\n'),
+        { env: {} },
+      ),
+    ).not.toThrow();
+  });
+});

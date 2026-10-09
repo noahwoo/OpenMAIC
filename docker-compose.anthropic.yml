@@ -1,0 +1,10 @@
+# Overlay for docker-compose.yml: use openmaic.yml (Anthropic provider) and take
+# ANTHROPIC_API_KEY / ANTHROPIC_BASE_URL from the shell that runs compose.
+#   docker compose -f docker-compose.yml -f docker-compose.anthropic.yml up -d --build
+services:
+  openmaic:
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:?set ANTHROPIC_API_KEY (e.g. source ~/.zshrc)}
+      - ANTHROPIC_BASE_URL=${ANTHROPIC_BASE_URL:?set ANTHROPIC_BASE_URL (e.g. source ~/.zshrc)}
+    volumes:
+      - ./openmaic.yml:/app/openmaic.yml:ro

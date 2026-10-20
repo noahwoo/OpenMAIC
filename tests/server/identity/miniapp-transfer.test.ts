@@ -6,6 +6,7 @@ import {
 } from '@/lib/server/identity/miniapp-transfer';
 import { resetOwnerAuthenticationForTests } from '@/lib/server/identity/registry';
 import { POST } from '@/app/miniapp/session/route';
+import { GET as launchPage } from '@/app/miniapp/route';
 import { NextRequest } from 'next/server';
 const grant = {
   ownerId: 'test-mobile',
@@ -65,4 +66,13 @@ it('accepts the public host when standalone normalizes the internal request URL'
     body: JSON.stringify({ token }),
   });
   expect((await POST(request)).status).toBe(200);
+});
+
+it('keeps the handoff page independent of app bootstrap scripts and disables caching', async () => {
+  const response = launchPage(new NextRequest('http://localhost/miniapp'));
+  const html = await response.text();
+  expect(response.headers.get('cache-control')).toBe('no-store');
+  expect(response.headers.get('content-security-policy')).toContain("default-src 'none'");
+  expect(html).toContain("fetch('/miniapp/session'");
+  expect(html).not.toContain('/_next/');
 });

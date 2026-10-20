@@ -1,0 +1,22 @@
+name: WeChat Mini Program
+on:
+  pull_request:
+    paths:
+      - 'apps/wechat-miniprogram/**'
+      - '.github/workflows/wechat-miniprogram.yml'
+  push:
+    paths:
+      - 'apps/wechat-miniprogram/**'
+      - '.github/workflows/wechat-miniprogram.yml'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node apps/wechat-miniprogram/scripts/check.cjs
+      - run: node --test apps/wechat-miniprogram/tests/*.test.cjs

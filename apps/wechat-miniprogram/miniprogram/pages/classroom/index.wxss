@@ -1,0 +1,36 @@
+.classroom {
+  padding-bottom: 300rpx;
+}
+.scene-title {
+  font-size: 38rpx;
+  flex: 1;
+  letter-spacing: -1rpx;
+}
+.scene-tabs {
+  width: 100%;
+  margin: 26rpx 0;
+}
+.scene-strip {
+  display: flex;
+  gap: 14rpx;
+  white-space: nowrap;
+}
+.scene-strip .pill {
+  flex-shrink: 0;
+  max-width: 380rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.modes {
+  margin: 30rpx 0;
+  justify-content: flex-start;
+}
+.speech.current {
+  border-color: #839af6;
+  box-shadow: 0 8rpx 30rpx #365cf510;
+}
+.audio-bar {
+  padding-bottom: 18rpx;
+  margin-bottom: 18rpx;
+  border-bottom: 1rpx solid #e2e8f2;
+}

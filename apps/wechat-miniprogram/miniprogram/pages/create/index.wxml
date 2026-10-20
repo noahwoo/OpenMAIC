@@ -1,0 +1,5 @@
+<view class="page"><view class="eyebrow">让问题成为起点</view><view class="title">为你定制<view>一堂好课。</view></view><view class="subtitle">写下主题、已有基础和想达到的目标。课件、讲解和测验将由服务端完成。</view>
+<textarea class="field" style="height:360rpx;margin-top:32rpx" maxlength="20000" placeholder="例如：用 3 节课教我二分查找，我没有编程基础。包含一个逐步示例和一个小测验。" value="{{requirement}}" bindinput="input"/>
+<view class="row card"><view><view class="card-title">先确认课程大纲</view><view class="muted">检查内容安排，再开始生成</view></view><switch checked="{{review}}" color="#365cf5" bindchange="toggle"/></view>
+<view class="section">试试这些灵感</view><view class="stack"><view class="pill" bindtap="example" data-topic="用 3 节简短课程解释二分查找，包含逐步示例和一道选择题。">从零理解二分查找 ↗</view><view class="pill" bindtap="example" data-topic="给初学者讲清楚光合作用，包含两个知识点和一个小测验。">植物怎样把阳光变成能量？ ↗</view></view>
+<view class="muted" style="margin-top:30rpx">生成可在后台继续；你可以离开页面后再查看进度。请勿重复提交同一任务。</view><view class="bottom"><button class="primary" loading="{{submitting}}" disabled="{{submitting || !requirement}}" bindtap="submit">生成我的课程 →</button></view></view>

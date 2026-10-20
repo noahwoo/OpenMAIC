@@ -799,6 +799,10 @@ clawhub install openmaic
 
 ---
 
+## 微信小程序前端
+
+独立原生竖屏 UI 位于 [`apps/wechat-miniprogram`](apps/wechat-miniprogram/README.md)，支持课程库、创建课程、大纲确认、生成进度、基础课件、讲义、语音和本地测验。接入与功能边界见模块说明。
+
 ## 🤝 参与贡献
 
 我们欢迎社区的贡献！无论是 Bug 报告、功能建议还是 Pull Request，都非常感谢。

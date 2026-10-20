@@ -1,0 +1,10 @@
+{
+  "name": "openmaic-wechat-miniprogram",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Native portrait WeChat frontend for OpenMAIC",
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "check": "node scripts/check.cjs"
+  }
+}

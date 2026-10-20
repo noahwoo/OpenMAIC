@@ -1,0 +1,14 @@
+<view class="page">
+ <view class="row"><view class="eyebrow">OPENMAIC · 随时开课</view><button class="quiet small" bindtap="settings">连接设置</button></view>
+ <view class="title">把好奇心<view>变成一堂课。</view></view><view class="subtitle">专属 AI 老师陪你拆解知识，一次学懂一个问题。</view>
+ <view class="hero" style="margin-top:32rpx" bindtap="create"><view class="muted">从一个问题开始</view><view class="hero-title">今天想学什么？ ↗</view><view class="muted">描述主题 · 生成课件 · 听讲与测验</view></view>
+ <view wx:if="{{error}}" class="error">{{error}}<button class="quiet" bindtap="settings">检查服务连接 →</button><button class="secondary" bindtap="retry">重新加载</button></view>
+ <view wx:if="{{runs.length}}" class="section">正在准备的课程</view>
+ <view wx:for="{{runs}}" wx:key="id" class="card" bindtap="openRun" data-id="{{item.id}}"><text class="tag">{{item.label}}</text><view class="card-title">{{item.title}}</view><view class="muted">{{item.detail}} · {{item.done}} / {{item.total || '—'}} 节</view><view class="progress-track"><view class="progress-fill" style="width:{{item.percent}}%"></view></view></view>
+ <view class="row section"><text>我的学习空间</text><text class="muted">{{courses.length}} 门课程</text></view>
+ <input class="field" placeholder="搜索课程" value="{{query}}" bindinput="search"/>
+ <block wx:if="{{loading}}"><view class="skeleton"></view><view class="skeleton"></view></block>
+ <view wx:for="{{filtered}}" wx:key="id" class="card" bindtap="openCourse" data-id="{{item.id}}"><text class="tag">随时继续学习</text><view class="card-title">{{item.name}}</view><view class="muted">{{item.description || 'AI 生成的专属课堂'}} →</view></view>
+ <view wx:if="{{!loading && !filtered.length && !error}}" class="empty">{{query ? '没有找到相关课程' : '学习空间还很安静。\n创建你的第一堂课吧。'}}</view>
+ <view class="bottom"><button class="primary" bindtap="create">＋ 创建一堂课</button></view>
+</view>

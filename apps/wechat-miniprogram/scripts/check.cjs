@@ -28,8 +28,9 @@ for (const file of files) {
   }
   if (file.endsWith('.wxml')) {
     const content = fs.readFileSync(file, 'utf8');
-    if (/<\/?(?:div|span|br|iframe|script|html)\b/i.test(content))
+    if (/<\/?(?:div|span|br|iframe|script|html|web-view)\b/i.test(content))
       throw new Error('Web-only tag in WXML: ' + file);
+    if (/wx:if="(?!\{\{)/.test(content)) throw new Error('Conditional must use WXML binding: ' + file);
     const jsFile = file.replace('.wxml', '.js');
     if (fs.existsSync(jsFile)) {
       let definition;
@@ -40,7 +41,7 @@ for (const file of files) {
         definition = value.methods;
       };
       require(jsFile);
-      for (const match of content.matchAll(/\b(?:bind\w+|catch\w+)="([A-Za-z]\w*)"/g)) {
+      for (const match of content.matchAll(/\b(?:bind:?\w+|catch:?\w+)="([A-Za-z]\w*)"/g)) {
         if (!definition || typeof definition[match[1]] !== 'function')
           throw new Error('Missing event handler ' + match[1] + ': ' + file);
       }

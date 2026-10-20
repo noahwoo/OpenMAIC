@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "我的课堂",
+  "usingComponents": {
+    "slide-view": "/components/slide-view/index"
+  }
+}

@@ -1,0 +1,4 @@
+<view class="hint">双指缩放课件 · 下方讲义可竖向阅读</view>
+<movable-area class="frame"><movable-view class="viewport" direction="all" scale scale-min="1" scale-max="3" out-of-bounds><view class="canvas" style="transform:scale({{scale}});background:{{background}}">
+<block wx:for="{{elements}}" wx:key="id"><view wx:if="{{item.type === 'text'}}" class="element text" style="{{item.style}}color:{{item.color}}"><rich-text nodes="{{item.content}}"/></view><image wx:elif="{{item.type === 'image' && item.imageSrc}}" class="element" style="{{item.style}}" src="{{item.imageSrc}}" mode="scaleToFill"/><view wx:elif="{{item.type === 'shape'}}" class="element shape" style="{{item.style}}background:{{item.fillColor}};"></view><view wx:elif="{{item.type === 'line'}}" class="element line" style="{{item.style}}"></view><view wx:else class="element fallback" style="{{item.style}}">{{item.text || item.type}}</view></block>
+</view></movable-view></movable-area>

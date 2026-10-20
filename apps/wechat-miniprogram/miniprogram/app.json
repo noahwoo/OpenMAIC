@@ -1,0 +1,22 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/create/index",
+    "pages/progress/index",
+    "pages/classroom/index",
+    "pages/settings/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "OpenMAIC 学习空间",
+    "navigationBarBackgroundColor": "#f5f7fb",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f5f7fb"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "networkTimeout": {
+    "request": 30000,
+    "downloadFile": 60000
+  }
+}

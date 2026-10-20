@@ -240,6 +240,16 @@ Page({
   resetQuiz() {
     this.setData({ submitted: false });
   },
+  openActivity() {
+    this.stopAudio();
+    wx.navigateTo({
+      url:
+        '/pages/activity/index?stageId=' +
+        encodeURIComponent(this.stageId) +
+        '&sceneId=' +
+        encodeURIComponent(this.data.scene.id),
+    });
+  },
   copyDesktop() {
     wx.setClipboardData({ data: api().baseUrl + '/classroom/' + encodeURIComponent(this.stageId) });
   },

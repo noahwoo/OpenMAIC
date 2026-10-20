@@ -4,7 +4,8 @@
     "pages/create/index",
     "pages/progress/index",
     "pages/classroom/index",
-    "pages/settings/index"
+    "pages/settings/index",
+    "pages/activity/index"
   ],
   "window": {
     "navigationBarTitleText": "OpenMAIC 学习空间",

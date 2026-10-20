@@ -2345,5 +2345,20 @@
         "materialExtraction": null
       }
     }
+  },
+  "miniapp": {
+    "launchFailed": "Launch expired or failed. Return to the mini program and open the activity again.",
+    "connecting": "Connecting to your classroom…",
+    "chapter": "Chapter",
+    "zoom": "Simulation zoom",
+    "previous": "Previous",
+    "next": "Next",
+    "play": "Play lecture",
+    "pause": "Pause",
+    "whiteboard": "Whiteboard",
+    "pblPanels": "Project panels",
+    "sidebar": "Tasks",
+    "chat": "Discussion",
+    "submission": "Submission"
   }
 }

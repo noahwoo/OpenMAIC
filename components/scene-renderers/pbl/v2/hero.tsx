@@ -218,6 +218,7 @@ export function PBLV2Hero({
   return (
     <div
       ref={fitContainerRef}
+      data-pbl-hero="true"
       className="relative h-full w-full overflow-hidden bg-gradient-to-br from-background via-background to-primary/[0.14]"
     >
       <div className="absolute inset-0 pointer-events-none">
@@ -234,6 +235,7 @@ export function PBLV2Hero({
       <div className="absolute inset-0 flex items-center justify-center">
         <div
           ref={fitContentRef}
+          data-pbl-hero-content="true"
           className="relative z-10 w-full max-w-3xl px-8 py-10"
           style={
             fitScale < 1

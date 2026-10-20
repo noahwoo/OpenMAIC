@@ -59,7 +59,9 @@ function sceneView(scene) {
       .map((e) => ({ id: e.id, text: plain(e.content || e.latex) }))
       .filter((e) => e.text),
     questions: content.questions || [],
-    unsupported: !['slide', 'quiz'].includes(scene.type),
+    interactiveActivity: ['interactive', 'pbl'].includes(scene.type),
+    hasWhiteboard: (scene.actions || []).some((a) => a.type.startsWith('wb_')),
+    unsupported: !['slide', 'quiz', 'interactive', 'pbl'].includes(scene.type),
   });
 }
 function gradeChoice(question, selected) {

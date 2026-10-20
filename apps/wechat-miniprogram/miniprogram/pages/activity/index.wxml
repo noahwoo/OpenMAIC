@@ -1,0 +1,2 @@
+<web-view wx:if="{{src}}" src="{{src}}" binderror="failed"/>
+<view wx:else class="page"><view wx:if="{{loading}}" class="empty">正在打开互动课堂…</view><view wx:if="{{error}}" class="error">{{error}}<button class="primary" bindtap="launch">重新连接</button></view></view>

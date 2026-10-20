@@ -2345,5 +2345,20 @@
         "materialExtraction": null
       }
     }
+  },
+  "miniapp": {
+    "launchFailed": "连接失效或失败，请返回小程序重新打开活动。",
+    "connecting": "正在连接你的课堂…",
+    "chapter": "章节",
+    "zoom": "模拟缩放",
+    "previous": "上一节",
+    "next": "下一节",
+    "play": "播放讲解",
+    "pause": "暂停",
+    "whiteboard": "白板",
+    "pblPanels": "项目面板",
+    "sidebar": "任务",
+    "chat": "讨论",
+    "submission": "提交"
   }
 }

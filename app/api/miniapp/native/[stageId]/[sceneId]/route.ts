@@ -108,6 +108,12 @@ async function handle(req: NextRequest, ctx: Context, mutate: boolean) {
       return Response.json(data, { headers });
     } catch (error) {
       const known = error instanceof NativeError;
+      if (known && error.status >= 500)
+        console.warn('[miniapp-native]', {
+          path: req.nextUrl.pathname,
+          status: error.status,
+          message: error.message,
+        });
       if (!known)
         console.error('[miniapp-native]', error instanceof Error ? error.message : 'Unknown error');
       return Response.json(

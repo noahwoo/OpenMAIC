@@ -1,0 +1,34 @@
+<view class="page">
+ <view class="title">{{title || '原生课程实验室'}}</view>
+ <view wx:if="{{loading}}" class="card">{{caption || '正在读取课程…'}}</view>
+ <view wx:if="{{error}}" class="error">{{error}}<button size="mini" bindtap="load" disabled="{{busy}}">刷新</button></view>
+ <block wx:if="{{!loading}}">
+ <view wx:if="{{unsupported}}" class="card">{{unsupported}}</view>
+ <block wx:if="{{type === 'simulation' && !unsupported}}">
+  <view class="card">{{spec.summary}}</view>
+  <native-canvas mode="simulation" spec="{{spec}}" values="{{values}}" bind:rendererror="renderError"/>
+  <view class="row"><button bindtap="play">{{playing?'暂停':'播放演示'}}</button><button bindtap="reset">重置</button><text>{{elapsed}} 秒</text></view>
+  <view class="card" wx:for="{{parameters}}" wx:key="id"><view>{{item.label}}：{{item.value}} {{item.unit}}</view><slider min="0" max="1000" step="1" value="{{item.percent}}" data-id="{{item.id}}" bindchange="parameter" activeColor="#6366f1"/><view class="muted">{{item.min}} — {{item.max}} {{item.unit}}</view></view>
+  <view class="outputs"><view class="card" wx:for="{{outputs}}" wx:key="id"><view class="muted">{{item.label}}</view><text class="number">{{item.display}}</text> {{item.unit}}</view></view>
+  <view class="card"><view class="heading">实验步骤</view><button wx:for="{{spec.steps}}" wx:key="title" data-index="{{index}}" bindtap="step" type="{{stepIndex===index?'primary':'default'}}">{{index+1}}. {{item.title}}</button><view class="copy">{{spec.steps[stepIndex].description}}</view></view>
+ </block>
+ <block wx:if="{{type === 'whiteboard'}}">
+  <native-canvas mode="whiteboard" frames="{{frames}}" elapsed="{{elapsed}}" bind:rendererror="renderError"/>
+  <view class="row"><button bindtap="play">{{playing?'暂停':'播放白板'}}</button><button bindtap="reset">重播</button><text>{{seconds || 0}} 秒</text></view>
+  <slider min="0" max="1000" value="{{seek}}" bindchange="seek"/>
+  <view class="card copy">{{caption || '播放可查看逐步讲解与绘制动画'}}</view><view wx:if="{{warning}}" class="muted">{{warning}}</view>
+ </block>
+ <block wx:if="{{type === 'pbl' && pbl}}">
+  <view class="card copy">{{pbl.description}}<view class="muted">项目状态：{{pbl.status}}</view></view>
+  <view class="card" wx:for="{{pbl.milestones}}" wx:key="id"><view class="heading">{{item.title}}</view><view class="copy">{{item.briefing}}</view><view wx:for="{{item.documents}}" wx:for-item="document" wx:key="id"><view class="heading">{{document.title}}</view><text selectable class="copy">{{document.content}}</text></view><view wx:for="{{item.tasks}}" wx:for-item="task" wx:key="id" class="task"><view>{{task.title}} · {{task.status}}</view><view class="copy muted">{{task.description}}</view><view wx:for="{{task.hints}}" wx:for-item="hint" wx:key="*this" class="muted">提示：{{hint}}</view><button size="mini" data-action="start" data-id="{{task.id}}" bindtap="command" disabled="{{busy || task.status === 'completed' || item.status === 'locked'}}">进入任务</button></view></view>
+  <view class="card"><view class="heading">导师与情境对话</view><button data-action="open" bindtap="command" disabled="{{busy}}">获取当前任务指导</button><view wx:for="{{pbl.messages}}" wx:key="id" class="message"><text class="role">{{item.role}}</text><text selectable class="copy">{{item.content}}</text></view><view wx:if="{{pbl.scenarioStage === 'roleplay'}}">与情境角色对话 <switch bindchange="channel" color="#6366f1"/></view><textarea value="{{draft}}" data-field="draft" bindinput="input" maxlength="12000" auto-height placeholder="输入问题或情境回应"/><button type="primary" data-action="message" bindtap="command" disabled="{{busy || !draft}}">发送</button></view>
+  <view class="card"><view class="heading">提交任务成果</view><textarea value="{{submission}}" data-field="submission" bindinput="input" maxlength="12000" auto-height placeholder="输入成果文本或附上作品链接"/><button data-action="submit" bindtap="command" disabled="{{busy || !submission}}">提交并评阅</button><button data-action="evaluate" bindtap="command" disabled="{{busy}}">重新评阅最近提交</button><view wx:for="{{pbl.submissions}}" wx:key="id" class="copy muted">已提交：{{item.content}}</view></view>
+  <view class="card" wx:for="{{pbl.evaluations}}" wx:key="id"><view class="heading">{{item.kind}} 评阅 · {{item.score}} 分</view><text class="copy" selectable>{{item.feedback}}</text></view>
+  <button wx:if="{{pbl.pendingTaskCompletion}}" type="primary" data-action="complete_pending_task" bindtap="command" disabled="{{busy}}">确认完成当前任务</button>
+  <button wx:if="{{pbl.pendingHandover}}" data-action="continue_handover" bindtap="command" disabled="{{busy}}">进入下一里程碑</button>
+  <view class="row"><button wx:if="{{pbl.scenarioStage === 'prep'}}" data-action="enter_scenario" bindtap="command" disabled="{{busy}}">进入情境</button><button wx:if="{{pbl.scenarioStage === 'roleplay'}}" data-action="complete_act" bindtap="command" disabled="{{busy}}">结束当前幕</button></view>
+  <view class="row"><button data-action="milestone" bindtap="command" disabled="{{busy}}">阶段评阅</button><button data-action="final" bindtap="command" disabled="{{busy}}">项目总评</button></view>
+  <view wx:if="{{busy}}" class="muted">正在处理，请稍候；输入与成果保存在服务端。</view>
+ </block>
+ </block>
+</view>

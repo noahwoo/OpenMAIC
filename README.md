@@ -916,7 +916,7 @@ Importing a classroom ZIP stores its embedded audio, images, video, and posters 
 
 ## WeChat Mini Program frontend
 
-The independent portrait-first native client lives in [`apps/wechat-miniprogram`](apps/wechat-miniprogram/README.md). It reuses the existing server APIs for the course library, generation and classroom content, with native narration playback and local practice quizzes. See the module README for setup and feature boundaries.
+The independent portrait-first native client lives in [`apps/wechat-miniprogram`](apps/wechat-miniprogram/README.md). It reuses the existing server APIs for the course library, generation and classroom content, with native narration playback and local practice quizzes. Interactive HTML, PBL tasks/submissions and animated whiteboard lessons use an embedded portrait classroom with session handoff. See the module README for setup and feature boundaries.
 
 ## 🤝 Contributing
 

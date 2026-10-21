@@ -124,6 +124,8 @@ const InteractiveWhiteboardCanvas = forwardRef<
   const [panY, setPanY] = useState(0);
   const [isPanning, setIsPanning] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const touchPointsRef = useRef(new Map<number, { x: number; y: number }>());
+  const pinchRef = useRef<{ distance: number; zoom: number } | null>(null);
   const panStartRef = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const prevElementsLengthRef = useRef(elements.length);
   const resetTimerRef = useRef<number | null>(null);
@@ -188,15 +190,45 @@ const InteractiveWhiteboardCanvas = forwardRef<
       }
 
       e.preventDefault();
+      if (e.pointerType === 'touch') {
+        touchPointsRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (touchPointsRef.current.size === 2) {
+          const [a, b] = [...touchPointsRef.current.values()];
+          pinchRef.current = {
+            distance: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)),
+            zoom: viewZoom,
+          };
+          setIsPanning(false);
+          e.currentTarget.setPointerCapture(e.pointerId);
+          return;
+        }
+      }
       setIsPanning(true);
       panStartRef.current = { x: e.clientX, y: e.clientY, panX, panY };
       (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     },
-    [panX, panY],
+    [panX, panY, viewZoom],
   );
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent) => {
+      if (e.pointerType === 'touch' && touchPointsRef.current.has(e.pointerId)) {
+        touchPointsRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (touchPointsRef.current.size >= 2 && pinchRef.current) {
+          e.preventDefault();
+          const [a, b] = [...touchPointsRef.current.values()];
+          const zoom = Math.min(
+            5,
+            Math.max(
+              0.2,
+              (pinchRef.current.zoom * Math.hypot(a.x - b.x, a.y - b.y)) /
+                pinchRef.current.distance,
+            ),
+          );
+          setViewZoom(zoom);
+          return;
+        }
+      }
       if (!isPanning) {
         return;
       }
@@ -215,13 +247,22 @@ const InteractiveWhiteboardCanvas = forwardRef<
     [containerScale, viewZoom, isPanning, clampPan],
   );
 
-  const handlePointerUp = useCallback((e: React.PointerEvent) => {
-    if ((e.currentTarget as HTMLElement).hasPointerCapture(e.pointerId)) {
-      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-    }
+  const handlePointerUp = useCallback(
+    (e: React.PointerEvent) => {
+      if ((e.currentTarget as HTMLElement).hasPointerCapture(e.pointerId)) {
+        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+      }
 
-    setIsPanning(false);
-  }, []);
+      touchPointsRef.current.delete(e.pointerId);
+      pinchRef.current = null;
+      if (touchPointsRef.current.size === 1) {
+        const [point] = [...touchPointsRef.current.values()];
+        panStartRef.current = { ...point, panX, panY };
+        setIsPanning(true);
+      } else setIsPanning(false);
+    },
+    [panX, panY],
+  );
 
   // Zoom toward cursor
   useEffect(() => {
@@ -319,9 +360,11 @@ const InteractiveWhiteboardCanvas = forwardRef<
     /* Viewport — fills workspace, handles pointer events, no clipping */
     <div
       ref={viewportRef}
+      data-whiteboard-viewport="true"
       className="w-full h-full relative select-none"
       style={{
         cursor: isPanning ? 'grabbing' : 'grab',
+        touchAction: 'none',
       }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}

@@ -112,9 +112,11 @@ export function PBLV2Workspace({
   onInstructorStreamingChange,
   onExpand,
 }: Props) {
+  const { t } = useI18n();
   const rootRef = useRef<HTMLDivElement>(null);
   const [panelWidths, setPanelWidths] = useState(DEFAULT_PANEL_WIDTHS);
   const [resizingHandle, setResizingHandle] = useState<ResizeHandleSide | null>(null);
+  const [mobilePanel, setMobilePanel] = useState<PanelSlot>('chat');
   const [submissionEvaluationStatus, setSubmissionEvaluationStatus] =
     useState<SubmissionEvaluationStatus | null>(null);
   const [sceneBusy, setSceneBusy] = useState(false);
@@ -344,6 +346,7 @@ export function PBLV2Workspace({
         'bg-[radial-gradient(circle_at_18%_5%,rgba(119,102,255,0.20),transparent_31%),radial-gradient(circle_at_86%_10%,rgba(20,184,166,0.17),transparent_29%),radial-gradient(circle_at_52%_105%,rgba(96,165,250,0.10),transparent_34%),linear-gradient(180deg,#182542_0%,#111c34_48%,#162743_100%)]',
       )}
       data-pbl-workspace="true"
+      data-mobile-panel={mobilePanel}
       style={{
         ...PBL_WORKSPACE_THEME,
         gridTemplateRows: '58px minmax(0, 1fr)',
@@ -357,6 +360,17 @@ export function PBLV2Workspace({
         onReturnToHero={onReturnToHero}
         onExpand={onExpand}
       />
+      <nav className="miniapp-pbl-tabs hidden" aria-label={t('miniapp.pblPanels')}>
+        {(['sidebar', 'chat', 'submission'] as const).map((panel) => (
+          <button
+            key={panel}
+            aria-pressed={mobilePanel === panel}
+            onClick={() => setMobilePanel(panel)}
+          >
+            {t(`miniapp.${panel}`)}
+          </button>
+        ))}
+      </nav>
       <Panel slot="sidebar">
         {/* Scene controls ("finish this act" / enter / continue) are disabled
             while ANYTHING is generating: character speaking, narrator,
@@ -603,6 +617,7 @@ function WorkspaceResizeHandle({
 function Panel({ slot, children }: { readonly slot: PanelSlot; readonly children: ReactNode }) {
   return (
     <div
+      data-pbl-panel={slot}
       className={cn(
         'relative row-start-2 h-full min-w-0 overflow-hidden backdrop-blur-[2px]',
         slot === 'sidebar' &&

@@ -26,6 +26,7 @@
  * also applies its viewer-specific edit access.
  */
 
+import { MobileClassroom } from '@/components/classroom/MobileClassroom';
 import { Stage } from '@/components/stage';
 import { ThemeProvider } from '@/lib/hooks/use-theme';
 import { useStageStore } from '@/lib/store';
@@ -60,9 +61,11 @@ const LOAD_UNAVAILABLE_ERROR = 'load-unavailable';
 export function ClassroomSurface({
   classroomId,
   variant = 'page',
+  mobile = false,
 }: {
   readonly classroomId: string;
   readonly variant?: 'page' | 'pane';
+  readonly mobile?: boolean;
 }) {
   const { loadFromStorage } = useStageStore();
   const loadedClassroomId = useStageStore((s) => s.stage?.id ?? null);
@@ -97,6 +100,31 @@ export function ClassroomSurface({
           isCurrent,
           loadFromStorage: async (id, token) => {
             await loadFromStorage(id, token);
+            if (mobile && isCurrent()) {
+              // Older courses keep their v1 skeleton when document editing is
+              // disabled. Upgrade before hydration so their learner records
+              // are restored without requiring a write to the course design.
+              const { resolvePBLContent, upgradeLegacyPBLConfigToProjectV2 } =
+                await import('@/lib/pbl/legacy/read');
+              const { hydratePBLProjectFromRuntime } =
+                await import('@/lib/pbl/v2/runtime/hydration');
+              await Promise.all(
+                useStageStore.getState().scenes.map(async (scene) => {
+                  if (scene.content.type !== 'pbl') return;
+                  const resolved = resolvePBLContent(scene.content);
+                  if (resolved.kind !== 'legacy') return;
+                  const { project } = await hydratePBLProjectFromRuntime({
+                    stageId: id,
+                    sceneId: scene.id,
+                    project: upgradeLegacyPBLConfigToProjectV2(resolved.projectConfig),
+                  });
+                  if (isCurrent())
+                    useStageStore
+                      .getState()
+                      .updateScene(scene.id, { content: { ...scene.content, projectV2: project } });
+                }),
+              );
+            }
             // `?scene=<id>` opens the page at that scene (links from exported
             // decks). Applied before the rest of the load so the opening
             // scene's media is the one hydrated first. The pane lives inside
@@ -158,7 +186,7 @@ export function ClassroomSurface({
         return isCurrent() ? 'failed' : 'cancelled';
       }
     },
-    [classroomId, loadFromStorage, variant],
+    [classroomId, loadFromStorage, variant, mobile],
   );
 
   const retryClassroom = useCallback(() => {
@@ -368,6 +396,8 @@ export function ClassroomSurface({
               status={runCourse.generation.status}
               href={runCourse.generation.href}
             />
+          ) : mobile ? (
+            <MobileClassroom />
           ) : (
             <Stage
               classroomId={classroomId}

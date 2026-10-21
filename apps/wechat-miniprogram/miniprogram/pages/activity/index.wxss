@@ -1,0 +1,96 @@
+.page {
+  padding: 28rpx 24rpx 80rpx;
+  color: #172033;
+}
+.title {
+  font-size: 38rpx;
+  font-weight: 700;
+  margin: 12rpx 0 28rpx;
+}
+.card {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  margin: 20rpx 0;
+  overflow: hidden;
+}
+.heading {
+  font-size: 30rpx;
+  font-weight: 650;
+  margin-bottom: 18rpx;
+}
+.muted {
+  color: #64748b;
+  font-size: 24rpx;
+  line-height: 1.6;
+}
+.row {
+  display: flex;
+  gap: 12rpx;
+  align-items: center;
+  margin: 22rpx 0;
+}
+.row button {
+  flex: 1;
+  font-size: 26rpx;
+  margin: 0;
+}
+.outputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+.outputs .card {
+  flex: 1;
+  min-width: 210rpx;
+}
+.number {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #6366f1;
+}
+.copy {
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.7;
+  font-size: 28rpx;
+  margin: 16rpx 0;
+}
+.task {
+  padding: 18rpx 0;
+  border-top: 1rpx solid #eef2f6;
+}
+.message {
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #eef2f6;
+}
+.role {
+  color: #6366f1;
+  font-size: 24rpx;
+  font-weight: 700;
+}
+.error {
+  background: #fff1f2;
+  color: #b91c1c;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin: 20rpx 0;
+  word-break: break-all;
+}
+textarea {
+  box-sizing: border-box;
+  background: #f1f5f9;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  width: 100%;
+  min-height: 150rpx;
+  margin: 20rpx 0;
+}
+button {
+  margin: 14rpx 0;
+  font-size: 28rpx;
+}
+button[type='primary'] {
+  background: #6366f1;
+}

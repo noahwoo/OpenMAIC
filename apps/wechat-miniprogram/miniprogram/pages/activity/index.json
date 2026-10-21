@@ -1,0 +1,4 @@
+{
+  "navigationBarTitleText": "原生课程实验室",
+  "usingComponents": { "native-canvas": "/components/native-canvas/index" }
+}

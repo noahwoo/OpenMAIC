@@ -95,7 +95,7 @@ function createClient(platform, config) {
       .join('; ');
     return cookie ? { Cookie: cookie } : {};
   }
-  function raw(path, method, data) {
+  function raw(path, method, data, timeout) {
     if (!/^\/api\//.test(path) || path.includes('://') || path.includes('..'))
       return Promise.reject(new Error('无效接口路径'));
     const device = devicePlatform(platform);
@@ -107,7 +107,7 @@ function createClient(platform, config) {
         method: method || 'GET',
         data,
         header: Object.assign({ 'Content-Type': 'application/json' }, headers()),
-        timeout: 30000,
+        timeout: Math.max(30000, Math.min(120000, timeout || 30000)),
         success(res) {
           const cookies =
             res.cookies && res.cookies.length
@@ -158,9 +158,9 @@ function createClient(platform, config) {
       session = null;
       await ensureSession();
     },
-    async request(path, method, data) {
+    async request(path, method, data, timeout) {
       await ensureSession();
-      return raw(path, method, data);
+      return raw(path, method, data, timeout);
     },
     downloadAsset(id) {
       if (!/^ast_[a-zA-Z0-9_-]+$/.test(id))

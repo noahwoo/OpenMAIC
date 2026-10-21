@@ -9,7 +9,7 @@ import type { PBLProjectV2 } from '@/lib/pbl/v2/types';
 import { resolvePBLContent, upgradeLegacyPBLConfigToProjectV2 } from '@/lib/pbl/legacy/read';
 import { normalizeProjectRuntime } from '@/lib/pbl/v2/operations/kernel/progress';
 import { transitionProjectUiPhase } from '@/lib/pbl/v2/operations/kernel/runtime-events';
-import { useStageStore } from '@/lib/store/stage';
+import { useStageStore, flushStageSave } from '@/lib/store/stage';
 import { cn } from '@/lib/utils/cn';
 import { PBLV2Hero } from './pbl/v2/hero';
 import { PBLV2Workspace } from './pbl/v2/workspace';
@@ -33,9 +33,10 @@ interface PBLRendererProps {
   readonly content: PBLContent;
   readonly mode: StageMode;
   readonly sceneId: string;
+  readonly mobile?: boolean;
 }
 
-export function PBLRenderer({ content, mode: _mode, sceneId }: PBLRendererProps) {
+export function PBLRenderer({ content, mode: _mode, sceneId, mobile = false }: PBLRendererProps) {
   const { t } = useI18n();
 
   const resolvedProjectV2 = useMemo(() => {
@@ -61,6 +62,12 @@ export function PBLRenderer({ content, mode: _mode, sceneId }: PBLRendererProps)
               projectV2: next,
             },
           });
+          // WebView users may leave immediately after submitting; start persistence
+          // before the ordinary document debounce window elapses.
+          if (mobile)
+            void flushStageSave().catch((error) =>
+              console.warn('[miniapp] PBL save pending', error),
+            );
         }}
       />
     );
